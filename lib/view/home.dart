@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sql_flite/DatabaseModel/Notes.dart';
-import 'package:sql_flite/de_handler.dart';
+import 'package:sql_flite/view/add_notes.dart';
+import 'package:sql_flite/view/buttom_sheet.dart';
+import 'package:sql_flite/view_model/de_handler.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -47,15 +49,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 } else {
                   return ListView.builder(
                     itemCount: snapshot.data!.length,
+
                     itemBuilder: (context, index) {
+                      final note = snapshot.data![index];
                       return InkWell(
                         onTap: () {
                           dbHelper!.update(
                             NotesModel(
                               id: snapshot.data![index].id!,
                               title: 'Updated',
-                              age: 20,
-                              description: 'after the updation the following result is shown',
+                              description:
+                                  'after the updation the following result is shown',
                               email: 'AdeelAhmad@gmail.com',
                             ),
                           );
@@ -77,11 +81,46 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: Colors.red,
                             child: const Icon(Icons.delete_forever),
                           ),
-                          child: Card(
-                            child: ListTile(
-                              title: Text(snapshot.data![index].title.toString()),
-                              subtitle: Text(snapshot.data![index].description.toString()),
-                              trailing: Text(snapshot.data![index].age.toString()),
+                          child: Container(
+                            height: 100,
+                            color: Colors.orange,
+                            child: Card(
+                              child: ListTile(
+                                title:
+                                    Text(snapshot.data![index].title.toString(),style: TextStyle(fontSize: 16,fontWeight:FontWeight.bold
+                                    ),),
+                                subtitle: Text(
+                                    snapshot.data![index].description.toString(),style:TextStyle(fontSize: 16),),
+                                trailing:SizedBox(
+                                  width: 100,
+                                  child: Row(
+                                    children: [
+                                      IconButton(onPressed: (){
+                                        setState(() {
+                                          showModalBottomSheet(context: context, builder: (BuildContext context){
+                                            return EditNoteBottomSheet(note: snapshot.data![index]);
+                                          });
+                                        });
+
+                                        }, icon:Icon(Icons.edit)),
+                                      IconButton(onPressed: (){
+                                        dbHelper!.delete(note.id!);
+                                        print("here is id: ${note.id}");
+
+                                        setState(() {
+
+                                          notesList=dbHelper!.getNotesList();
+                                        });
+                                      },
+
+
+                                          icon:Icon(Icons.delete))
+                                    ],
+                                  ),
+
+                                ),
+
+                              ),
                             ),
                           ),
                         ),
@@ -95,24 +134,27 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.indigo,
         onPressed: () {
-          dbHelper!.insert(
-            NotesModel(
-              title: 'My Notes',
-              age: 19,
-              description: 'hey i am learning the sqflite',
-              email: 'adeelahmad@gmail.com',
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => AddNoteScreen(
+                onNoteAdded: (newNote) {
+                  // Add the new note to the database
+                  dbHelper!.insert(newNote).then((value) {
+                    print('Data added Successfully');
+                    setState(() {
+                      notesList = dbHelper!.getNotesList();
+                    });
+                  }).onError((error, stackTrace) {
+                    print(error.toString());
+                  });
+                },
+              ),
             ),
-          ).then((value) {
-            print('Data added Successfully');
-            setState(() {
-              notesList = dbHelper!.getNotesList();
-            });
-          }).onError((error, stackTrace) {
-            print(error.toString());
-          });
+          );
         },
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.add,),
       ),
     );
   }

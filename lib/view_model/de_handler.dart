@@ -3,11 +3,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 import 'dart:io' as io;
-
 import 'package:sql_flite/DatabaseModel/Notes.dart';
-
-
-
 
 class DBHelper{
 
@@ -31,7 +27,7 @@ class DBHelper{
   }
   _onCreate(Database db,int version)async{
     await db.execute(
-        'CREATE TABLE notes (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, age INTEGER NOT NULL,description TEXT NOT NULL,email TEXT)'
+        'CREATE TABLE notes (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL,description TEXT NOT NULL,email TEXT)'
     );
 
 
@@ -68,9 +64,6 @@ class DBHelper{
         where: 'id=?',
         whereArgs: [notesModel.id]
     );
-
-
-
   }
 
 
